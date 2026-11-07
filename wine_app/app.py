@@ -32,7 +32,7 @@ test = load_test()
 config = json.loads((BASE / 'config.json').read_text())
 threshold_default = float(config['threshold'])
 with st.sidebar:
-    threshold = st.slider('Порог хорошего вина', 0.0, 1.0, threshold_default, 0.01, key='threshold')
+    threshold = st.slider('Порог хорошего вина', 0.0, 1.0, threshold_default, step=0.005, format='%.3f', key='threshold')
 
 single_tab, metrics_tab, batch_tab, weights_tab = st.tabs(['Одно вино', 'Модельные метрики', 'Пакетная загрузка', 'Что выучила модель'])
 
@@ -51,7 +51,10 @@ with single_tab:
         row = pd.DataFrame([values], columns=FEATURES)
         probability = float(model.predict_proba(row)[:, 1][0])
         st.metric('Вероятность хорошего вина', f'{probability:.2%}')
-        st.success('Рекомендуем в подборку' if probability >= threshold else 'Не включаем в подборку')
+        if probability >= threshold:
+            st.success('Рекомендуем в подборку')
+        else:
+            st.warning('Не включаем в подборку')
 
 with metrics_tab:
     st.subheader('Качество на тестовой выборке')
